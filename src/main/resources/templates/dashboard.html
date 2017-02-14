@@ -6,5 +6,10 @@
 </head>
 <body>
     <h1>Dashboard</h1>
+    <table>
+        <tr><td>Card Number: </td><td th:text="${card.number}" /></tr>
+        <tr><td>Owner Name: </td><td th:text="${card.ownerName}" /></tr>
+        <tr><td>Card Balance: </td><td th:text="${card.balance}" /></tr>
+    </table>
 </body>
 </html>

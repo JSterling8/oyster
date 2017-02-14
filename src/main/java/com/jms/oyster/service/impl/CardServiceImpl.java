@@ -22,7 +22,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public Card createCard(String ownerName) {
-        Card card = new Card(random.nextInt(), ownerName, DEFAULT_STARTING_BALANCE);
+        Card card = new Card(Math.abs(random.nextInt()), ownerName, DEFAULT_STARTING_BALANCE);
 
         return cardRepository.createCard(card);
     }
