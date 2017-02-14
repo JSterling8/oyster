@@ -22,7 +22,6 @@ public class BarrierServiceImpl implements BarrierService {
     public static final double COST_ONE_ZONE_NOT_INCLUDING_ZONE_ONE = 2.0D;
     public static final double COST_TWO_ZONES_INCLUDING_ZONE_ONE = 3.0D;
     public static final double COST_TWO_ZONES_EXCLUDING_ZONE_ONE = 2.25D;
-    public static final double COST_THREE_ZONES = 3.20D;
 
     private final JourneyRepository journeyRepository;
 
@@ -36,12 +35,9 @@ public class BarrierServiceImpl implements BarrierService {
             throws InsufficientCardBalanceException, IllegalParameterException {
         Barrier mostRecentTubeBarrierPassed = journeyRepository.getMostRecentTubeBarrierPassed(card.getNumber());
 
-        if(barrier.getDirection() == Direction.OUT &&
-                (mostRecentTubeBarrierPassed == null || mostRecentTubeBarrierPassed.getDirection() == Direction.OUT)) {
-            throw new IllegalParameterException("You can't tap out when you never tapped in.");
-        }
+        verifyTripIsValid(barrier, mostRecentTubeBarrierPassed);
 
-        if(mostRecentTubeBarrierPassed != null && mostRecentTubeBarrierPassed.getDirection() == Direction.IN) {
+        if(isUserDueRefund(mostRecentTubeBarrierPassed)) {
             card.addAmount(MAX_COST);
         }
 
@@ -95,19 +91,24 @@ public class BarrierServiceImpl implements BarrierService {
         return minZonesVisited;
     }
 
+    private boolean isUserDueRefund(Barrier mostRecentTubeBarrierPassed) {
+        return mostRecentTubeBarrierPassed != null && mostRecentTubeBarrierPassed.getDirection() == Direction.IN;
+    }
+
     private Double getCost(Barrier barrier, Card card) {
         if(barrier.getType() == Type.BUS) {
             return BUS_COST;
         }
 
-        Barrier comingFromTubeStation = journeyRepository.getMostRecentTubeBarrierPassed(card.getNumber());
-        if(comingFromTubeStation == null || comingFromTubeStation.getDirection() == Direction.OUT) {
+        Barrier comingFromTubeBarrier = journeyRepository.getMostRecentTubeBarrierPassed(card.getNumber());
+
+        if(isStartingTubeJourney(comingFromTubeBarrier)) {
             return MAX_COST;
         }
 
-        int minZonesCrossed = getMinZonesCrossed(comingFromTubeStation.getZones(), barrier.getZones());
+        int minZonesCrossed = getMinZonesCrossed(comingFromTubeBarrier.getZones(), barrier.getZones());
 
-        boolean zoneOneCrossed = mustHaveCrossedZoneOne(comingFromTubeStation.getZones(), barrier.getZones(), minZonesCrossed);
+        boolean zoneOneCrossed = mustHaveCrossedZoneOne(comingFromTubeBarrier.getZones(), barrier.getZones(), minZonesCrossed);
 
         if(crossedOnlyZoneOne(minZonesCrossed, zoneOneCrossed)) {
             return COST_ONLY_ZONE_ONE;
@@ -126,10 +127,21 @@ public class BarrierServiceImpl implements BarrierService {
         }
 
         if(crossedThreeZones(minZonesCrossed)) {
-            return COST_THREE_ZONES;
+            return MAX_COST;
         }
 
         return MAX_COST;
+    }
+
+    private boolean isStartingTubeJourney(Barrier comingFromTubeBarrier) {
+        return comingFromTubeBarrier == null || comingFromTubeBarrier.getDirection() == Direction.OUT;
+    }
+
+    private void verifyTripIsValid(Barrier barrier, Barrier mostRecentTubeBarrierPassed) throws IllegalParameterException {
+        if(barrier.getDirection() == Direction.OUT &&
+                (isStartingTubeJourney(mostRecentTubeBarrierPassed))) {
+            throw new IllegalParameterException("You can't tap out when you never tapped in.");
+        }
     }
 
     private boolean crossedThreeZones(int minZonesCrossed) {
