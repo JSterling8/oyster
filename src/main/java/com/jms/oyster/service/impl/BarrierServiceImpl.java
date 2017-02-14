@@ -100,16 +100,19 @@ public class BarrierServiceImpl implements BarrierService {
             return BUS_COST;
         }
 
-        Barrier comingFromTubeBarrier = journeyRepository.getMostRecentTubeBarrierPassed(card.getNumber());
+        Barrier tubeBarrierComingFrom = journeyRepository.getMostRecentTubeBarrierPassed(card.getNumber());
 
-        if(isStartingTubeJourney(comingFromTubeBarrier)) {
+        if(isStartingTubeJourney(tubeBarrierComingFrom)) {
             return MAX_COST;
         }
 
-        int minZonesCrossed = getMinZonesCrossed(comingFromTubeBarrier.getZones(), barrier.getZones());
+        int minZonesCrossed = getMinZonesCrossed(tubeBarrierComingFrom.getZones(), barrier.getZones());
+        boolean zoneOneCrossed = mustHaveCrossedZoneOne(tubeBarrierComingFrom.getZones(), barrier.getZones(), minZonesCrossed);
 
-        boolean zoneOneCrossed = mustHaveCrossedZoneOne(comingFromTubeBarrier.getZones(), barrier.getZones(), minZonesCrossed);
+        return getCost(minZonesCrossed, zoneOneCrossed);
+    }
 
+    private Double getCost(int minZonesCrossed, boolean zoneOneCrossed) {
         if(crossedOnlyZoneOne(minZonesCrossed, zoneOneCrossed)) {
             return COST_ONLY_ZONE_ONE;
         }
