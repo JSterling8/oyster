@@ -9,8 +9,6 @@ import com.jms.oyster.service.BarrierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import static com.jms.oyster.model.Barrier.Direction;
@@ -36,8 +34,14 @@ public class BarrierServiceImpl implements BarrierService {
     @Override
     public Card passBarrier(Barrier barrier, Card card)
             throws InsufficientCardBalanceException, IllegalParameterException {
-        Barrier mostRecentTubeBarrierPasseded = journeyRepository.getMostRecentTubeBarrierPassed(card.getNumber());
-        if(mostRecentTubeBarrierPasseded != null && mostRecentTubeBarrierPasseded.getDirection() == Direction.IN) {
+        Barrier mostRecentTubeBarrierPassed = journeyRepository.getMostRecentTubeBarrierPassed(card.getNumber());
+
+        if(barrier.getDirection() == Direction.OUT &&
+                (mostRecentTubeBarrierPassed == null || mostRecentTubeBarrierPassed.getDirection() == Direction.OUT)) {
+            throw new IllegalParameterException("You can't tap out when you never tapped in.");
+        }
+
+        if(mostRecentTubeBarrierPassed != null && mostRecentTubeBarrierPassed.getDirection() == Direction.IN) {
             card.addAmount(MAX_COST);
         }
 
@@ -49,7 +53,9 @@ public class BarrierServiceImpl implements BarrierService {
 
         card.removeAmount(cost);
 
-        journeyRepository.addJourney(card.getNumber(), barrier);
+        if(barrier.getType() == Type.TUBE) {
+            journeyRepository.addJourney(card.getNumber(), barrier);
+        }
 
         return card;
     }
@@ -144,9 +150,5 @@ public class BarrierServiceImpl implements BarrierService {
 
     private boolean crossedOneZoneOutsideOfZoneOne(int minZonesCrossed, boolean zoneOneCrossed) {
         return minZonesCrossed == 1 && !zoneOneCrossed;
-    }
-
-    private Set<Integer> generateZoneSetWithValues(Integer... values) {
-        return new HashSet<>(Arrays.asList(values));
     }
 }

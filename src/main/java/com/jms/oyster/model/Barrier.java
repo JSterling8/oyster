@@ -61,4 +61,14 @@ public class Barrier {
         result = 31 * result + direction.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Barrier{" +
+                "zones=" + zones +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                ", direction=" + direction +
+                '}';
+    }
 }
