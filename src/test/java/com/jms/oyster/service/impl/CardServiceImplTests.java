@@ -3,6 +3,7 @@ package com.jms.oyster.service.impl;
 
 import com.jms.oyster.exception.CardNotFoundException;
 import com.jms.oyster.model.Card;
+import com.jms.oyster.repository.CardRepository;
 import com.jms.oyster.service.CardService;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +17,8 @@ public class CardServiceImplTests {
 
     @Before
     public void setup() {
-        cardService = new CardServiceImpl();
+        // I'd normally mock the CardRepsoitory, but it's stubbed anyway.
+        cardService = new CardServiceImpl(new CardRepository());
     }
 
     @Test
