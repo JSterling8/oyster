@@ -31,7 +31,7 @@ public class BarrierServiceImpl implements BarrierService {
     }
 
     @Override
-    public Card passBarrier(Barrier barrier, Card card)
+    public Card attemptToPassBarrier(Barrier barrier, Card card)
             throws InsufficientCardBalanceException, IllegalParameterException {
         Barrier mostRecentTubeBarrierPassed = journeyRepository.getMostRecentTubeBarrierPassed(card.getNumber());
 

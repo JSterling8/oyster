@@ -45,53 +45,53 @@ public class BarrierServiceImplTests {
     }
 
     @Test
-    public void passBarrier_shouldRemoveMaxFareWhenPassingInForTubeJourney() throws Exception {
+    public void attemptToPassBarrier_shouldRemoveMaxFareWhenPassingInForTubeJourney() throws Exception {
         Barrier barrier = new Barrier(generateZoneSetWithValues(1), "Holborn", Type.TUBE, Direction.IN);
-        barrierService.passBarrier(barrier, card);
+        barrierService.attemptToPassBarrier(barrier, card);
 
         verify(card).removeAmount(BarrierServiceImpl.MAX_COST);
     }
 
     @Test
-    public void passBarrier_shouldRefundPreviousIntoTubeFareIfNewFareIsOutOfTube() throws Exception {
+    public void attemptToPassBarrier_shouldRefundPreviousIntoTubeFareIfNewFareIsOutOfTube() throws Exception {
         Barrier previousBarrier = new Barrier(generateZoneSetWithValues(1), "Holborn", Type.TUBE, Direction.IN);
         Barrier currentBarrier = new Barrier(generateZoneSetWithValues(1, 2), "Earl's Court", Type.TUBE, Direction.OUT);
         when(journeyRepository.getMostRecentTubeBarrierPassed(CARD_NUMBER)).thenReturn(previousBarrier);
-        barrierService.passBarrier(currentBarrier, card);
+        barrierService.attemptToPassBarrier(currentBarrier, card);
 
         verify(card).addAmount(BarrierServiceImpl.MAX_COST);
     }
 
     @Test
-    public void passBarrier_shouldAddPassToJourneyRepository() throws Exception {
+    public void attemptToPassBarrier_shouldAddPassToJourneyRepository() throws Exception {
         Barrier currentBarrier = new Barrier(generateZoneSetWithValues(1, 2), "Earl's Court", Type.TUBE, Direction.IN);
-        barrierService.passBarrier(currentBarrier, card);
+        barrierService.attemptToPassBarrier(currentBarrier, card);
 
         verify(card, never()).addAmount(BarrierServiceImpl.MAX_COST);
     }
 
     @Test
-    public void passBarrier_shouldNotRefundFareIfNoPreviousJourney() throws Exception {
+    public void attemptToPassBarrier_shouldNotRefundFareIfNoPreviousJourney() throws Exception {
         Barrier currentBarrier = new Barrier(generateZoneSetWithValues(1, 2), "Earl's Court", Type.TUBE, Direction.IN);
-        barrierService.passBarrier(currentBarrier, card);
+        barrierService.attemptToPassBarrier(currentBarrier, card);
 
         verify(card, never()).addAmount(BarrierServiceImpl.MAX_COST);
     }
 
     @Test
-    public void passBarrier_shouldNotRefundFareIfPreviousTubeBarrierWasExit() throws Exception {
+    public void attemptToPassBarrier_shouldNotRefundFareIfPreviousTubeBarrierWasExit() throws Exception {
         Barrier previousBarrier = new Barrier(generateZoneSetWithValues(1, 2), "Earl's Court", Type.TUBE, Direction.OUT);
         Barrier currentBarrier = new Barrier(generateZoneSetWithValues(1, 2), "Earl's Court", Type.TUBE, Direction.IN);
         when(journeyRepository.getMostRecentTubeBarrierPassed(CARD_NUMBER)).thenReturn(previousBarrier);
-        barrierService.passBarrier(currentBarrier, card);
+        barrierService.attemptToPassBarrier(currentBarrier, card);
 
         verify(card, never()).addAmount(BarrierServiceImpl.MAX_COST);
     }
 
     @Test
-    public void passBarrier_shouldOnlyCharge180ForBusJourney() throws Exception {
+    public void attemptToPassBarrier_shouldOnlyCharge180ForBusJourney() throws Exception {
         Barrier busBarrier = new Barrier(generateZoneSetWithValues(1), "Any", Type.BUS, Direction.IN);
-        barrierService.passBarrier(busBarrier, card);
+        barrierService.attemptToPassBarrier(busBarrier, card);
 
         verify(card, never()).addAmount(anyDouble());
         verify(card).removeAmount(BarrierServiceImpl.BUS_COST);

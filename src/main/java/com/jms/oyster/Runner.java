@@ -132,7 +132,7 @@ public class Runner implements CommandLineRunner {
         boolean wasSuccessful = true;
 
         try {
-            barrierService.passBarrier(barrier, card);
+            barrierService.attemptToPassBarrier(barrier, card);
         } catch (InsufficientCardBalanceException e) {
             wasSuccessful = false;
         }
