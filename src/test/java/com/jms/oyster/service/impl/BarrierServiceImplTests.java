@@ -89,6 +89,15 @@ public class BarrierServiceImplTests {
     }
 
     @Test
+    public void passBarrier_shouldOnlyCharge180ForBusJourney() throws Exception {
+        Barrier busBarrier = new Barrier(generateZoneSetWithValues(1), "Any", Type.BUS, Direction.IN);
+        barrierService.passBarrier(busBarrier, card);
+
+        verify(card, never()).addAmount(anyDouble());
+        verify(card).removeAmount(BarrierServiceImpl.BUS_COST);
+    }
+
+    @Test
     public void minZonesCrossed_shouldReturnOneZoneIfOneZoneCrossed() {
         int expectedZonesCrossed = 1;
         int actualZonesCrossed =

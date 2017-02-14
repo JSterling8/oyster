@@ -16,7 +16,7 @@ import static com.jms.oyster.model.Barrier.Type;
 
 @Service
 public class BarrierServiceImpl implements BarrierService {
-    public static final Double BUS_COST = 1.8D;
+    public static final double BUS_COST = 1.8D;
     public static final double MAX_COST = 3.2D;
     public static final double COST_ONLY_ZONE_ONE = 2.5D;
     public static final double COST_ONE_ZONE_NOT_INCLUDING_ZONE_ONE = 2.0D;
