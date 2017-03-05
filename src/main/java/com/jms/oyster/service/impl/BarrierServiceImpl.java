@@ -58,16 +58,8 @@ public class BarrierServiceImpl implements BarrierService {
 
     @Override
     public boolean mustHaveCrossedZoneOne(Set<Integer> from, Set<Integer> to, int minZonesCrossed) {
-        if(minZonesCrossed == 1 && from.contains(1) && to.contains(1)) {
-            return true;
-        }
+        return (from.size() == 1 && from.contains(1)) || (to.size() == 1 && to.contains(1));
 
-        if(minZonesCrossed > 1 &&
-                (from.size() == 1 && from.contains(1)) || (to.size() == 1 && to.contains(1))) {
-            return true;
-        }
-
-        return false;
     }
 
     @Override
